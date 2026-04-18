@@ -14,16 +14,11 @@
     :root {
       --bg: #0b0b0f;
       --card: rgba(28, 28, 32, 0.84);
-      --card-strong: rgba(36, 36, 42, 0.94);
       --text: #ffffff;
       --muted: #a1a1aa;
       --accent: #4f8cff;
-      --accent-pressed: #2f6fe8;
       --border: rgba(255, 255, 255, 0.08);
       --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-      --radius-xl: 24px;
-      --radius-lg: 18px;
-      --radius-md: 14px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-top: env(safe-area-inset-top, 0px);
     }
@@ -43,15 +38,6 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     }
 
-    body {
-      animation: fadeIn 0.35s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.995); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
     #app {
       position: relative;
       width: 100%;
@@ -61,7 +47,7 @@
     #map {
       width: 100%;
       height: 100%;
-      filter: saturate(0.95) contrast(1.02);
+      filter: saturate(1.02) contrast(1.03);
     }
 
     .top-wrap {
@@ -91,13 +77,6 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      transform: translateY(0);
-      animation: slideDown 0.35s ease;
-    }
-
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-12px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .search-icon {
@@ -162,18 +141,12 @@
     .results {
       border-radius: 18px;
       overflow: hidden;
-      max-height: 220px;
+      max-height: 240px;
       display: none;
     }
 
     .results.show {
       display: block;
-      animation: popIn 0.2s ease;
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .result-item {
@@ -206,7 +179,7 @@
     .floating-actions {
       position: absolute;
       right: 14px;
-      bottom: 190px;
+      bottom: 180px;
       z-index: 1000;
       display: flex;
       flex-direction: column;
@@ -221,11 +194,6 @@
       color: var(--text);
       font-size: 20px;
       cursor: pointer;
-      transition: transform 0.18s ease, background 0.18s ease;
-    }
-
-    .fab:active {
-      transform: scale(0.96);
     }
 
     .bottom-sheet {
@@ -236,12 +204,6 @@
       z-index: 1000;
       border-radius: 28px;
       padding: 14px;
-      animation: riseUp 0.35s ease;
-    }
-
-    @keyframes riseUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     .sheet-handle {
@@ -271,7 +233,6 @@
       border-radius: 18px;
       padding: 12px;
       margin-bottom: 12px;
-      transition: 0.22s ease;
     }
 
     .info-label {
@@ -283,32 +244,9 @@
     .info-value {
       font-size: 14px;
       font-weight: 600;
-      line-height: 1.35;
+      line-height: 1.4;
       word-break: break-word;
-    }
-
-    .coords-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .mini-box {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 14px;
-      padding: 10px;
-    }
-
-    .mini-label {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 3px;
-    }
-
-    .mini-value {
-      font-size: 13px;
-      font-weight: 700;
+      min-height: 40px;
     }
 
     .confirm-btn {
@@ -321,17 +259,11 @@
       font-weight: 800;
       padding: 15px 16px;
       cursor: pointer;
-      transition: transform 0.18s ease, opacity 0.18s ease;
-    }
-
-    .confirm-btn:active {
-      transform: scale(0.985);
     }
 
     .confirm-btn:disabled {
       opacity: 0.45;
       cursor: default;
-      transform: none;
     }
 
     .hint {
@@ -339,11 +271,6 @@
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-    }
-
-    .leaflet-top,
-    .leaflet-bottom {
-      z-index: 500 !important;
     }
 
     .leaflet-control-zoom {
@@ -365,13 +292,6 @@
       background: radial-gradient(circle at 30% 30%, #8db7ff 0%, #3f86ff 55%, #256fff 100%);
       border: 3px solid rgba(255,255,255,0.95);
       box-shadow: 0 0 0 8px rgba(79, 140, 255, 0.12), 0 8px 18px rgba(27, 89, 214, 0.45);
-      animation: pulseMarker 1.8s infinite;
-    }
-
-    @keyframes pulseMarker {
-      0% { box-shadow: 0 0 0 0 rgba(79, 140, 255, 0.32), 0 8px 18px rgba(27, 89, 214, 0.45); }
-      70% { box-shadow: 0 0 0 12px rgba(79, 140, 255, 0), 0 8px 18px rgba(27, 89, 214, 0.45); }
-      100% { box-shadow: 0 0 0 0 rgba(79, 140, 255, 0), 0 8px 18px rgba(27, 89, 214, 0.45); }
     }
 
     .loader {
@@ -420,22 +340,11 @@
       <div class="info-card">
         <div class="info-label">Адрес / точка</div>
         <div id="addressValue" class="info-value">Точка пока не выбрана</div>
-
-        <div class="coords-row">
-          <div class="mini-box">
-            <div class="mini-label">Широта</div>
-            <div id="latValue" class="mini-value">—</div>
-          </div>
-          <div class="mini-box">
-            <div class="mini-label">Долгота</div>
-            <div id="lonValue" class="mini-value">—</div>
-          </div>
-        </div>
       </div>
 
       <button id="confirmBtn" class="confirm-btn" disabled>Подтвердить точку</button>
       <div id="loader" class="loader">Определяю адрес...</div>
-      <div class="hint">Можно переключать карту, искать адрес и выбирать текущее местоположение</div>
+      <div class="hint">Подсказки появляются прямо во время ввода</div>
     </div>
   </div>
 
@@ -448,9 +357,10 @@
       preferCanvas: true
     }).setView([51.831711, 9.447659], 11);
 
+    // Более приятная базовая карта
     const streetLayer = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      { attribution: "&copy; OpenStreetMap contributors" }
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      { attribution: "&copy; OpenStreetMap &copy; CARTO" }
     );
 
     const satelliteLayer = L.tileLayer(
@@ -464,10 +374,9 @@
     let marker = null;
     let selected = null;
     let searchAbortController = null;
+    let inputDebounce = null;
 
     const addressValue = document.getElementById("addressValue");
-    const latValue = document.getElementById("latValue");
-    const lonValue = document.getElementById("lonValue");
     const confirmBtn = document.getElementById("confirmBtn");
     const mapModeBtn = document.getElementById("mapModeBtn");
     const satModeBtn = document.getElementById("satModeBtn");
@@ -515,8 +424,6 @@
 
     function setMarker(lat, lon) {
       selected = { lat, lon };
-      latValue.textContent = lat.toFixed(6);
-      lonValue.textContent = lon.toFixed(6);
       confirmBtn.disabled = false;
 
       if (marker) {
@@ -531,15 +438,12 @@
         setLoading(true);
         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
         const res = await fetch(url, {
-          headers: {
-            "Accept-Language": "ru,en"
-          }
+          headers: { "Accept-Language": "ru,en" }
         });
         const data = await res.json();
-        const label = data.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-        addressValue.textContent = label;
+        addressValue.textContent = data.display_name || "Точка выбрана";
       } catch {
-        addressValue.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        addressValue.textContent = "Точка выбрана";
       } finally {
         setLoading(false);
       }
@@ -562,11 +466,7 @@
       resultsBox.innerHTML = "";
 
       if (!items.length) {
-        const empty = document.createElement("div");
-        empty.className = "result-item";
-        empty.innerHTML = '<div class="result-title">Ничего не найдено</div>';
-        resultsBox.appendChild(empty);
-        resultsBox.classList.add("show");
+        clearResults();
         return;
       }
 
@@ -575,7 +475,7 @@
         div.className = "result-item";
         div.innerHTML = `
           <div class="result-title">${item.display_name}</div>
-          <div class="result-sub">${Number(item.lat).toFixed(5)}, ${Number(item.lon).toFixed(5)}</div>
+          <div class="result-sub">Нажмите, чтобы выбрать</div>
         `;
         div.addEventListener("click", async () => {
           clearResults();
@@ -588,9 +488,12 @@
       resultsBox.classList.add("show");
     }
 
-    async function searchAddress() {
+    async function searchAddress(live = false) {
       const q = searchInput.value.trim();
-      if (!q) return;
+      if (!q || q.length < 3) {
+        clearResults();
+        return;
+      }
 
       try {
         if (searchAbortController) {
@@ -598,22 +501,22 @@
         }
         searchAbortController = new AbortController();
 
-        searchBtn.disabled = true;
-        searchBtn.textContent = "…";
+        if (!live) {
+          searchBtn.disabled = true;
+          searchBtn.textContent = "…";
+        }
 
-        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=5`;
+        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=6`;
         const res = await fetch(url, {
           signal: searchAbortController.signal,
-          headers: {
-            "Accept-Language": "ru,en"
-          }
+          headers: { "Accept-Language": "ru,en" }
         });
 
         const data = await res.json();
         renderResults(data);
       } catch (e) {
         if (e.name !== "AbortError") {
-          renderResults([]);
+          clearResults();
         }
       } finally {
         searchBtn.disabled = false;
@@ -653,16 +556,32 @@
       );
     });
 
-    searchBtn.addEventListener("click", searchAddress);
+    searchBtn.addEventListener("click", () => searchAddress(false));
+
     searchInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        searchAddress();
+        searchAddress(false);
       }
     });
 
     searchInput.addEventListener("input", () => {
+      clearTimeout(inputDebounce);
+
       if (!searchInput.value.trim()) {
         clearResults();
+        return;
+      }
+
+      inputDebounce = setTimeout(() => {
+        searchAddress(true);
+      }, 280);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!resultsBox.contains(e.target) && e.target !== searchInput) {
+        if (!resultsBox.contains(e.target)) {
+          clearResults();
+        }
       }
     });
 
