@@ -2,78 +2,362 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Выбор точки доставки</title>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
+    :root {
+      --bg: #f2f2f7;
+      --card: rgba(255, 255, 255, 0.92);
+      --text: #111111;
+      --muted: #6e6e73;
+      --accent: #0a84ff;
+      --accent-pressed: #0066cc;
+      --border: rgba(60, 60, 67, 0.12);
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      --radius-xl: 20px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
-      font-family: sans-serif;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      overflow: hidden;
     }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
     #map {
-      height: calc(100% - 64px);
       width: 100%;
+      height: 100%;
     }
-    .bar {
-      height: 64px;
+
+    .topbar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 1000;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 8px;
-      box-sizing: border-box;
-      background: #fff;
+      pointer-events: none;
     }
-    button {
-      width: 100%;
-      max-width: 420px;
-      height: 48px;
+
+    .segment {
+      display: inline-flex;
+      gap: 4px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+      box-shadow: var(--shadow);
+      pointer-events: auto;
+    }
+
+    .segment button {
       border: 0;
-      border-radius: 12px;
-      font-size: 16px;
+      background: transparent;
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
+    }
+
+    .segment button.active {
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    }
+
+    .floating-actions {
+      position: absolute;
+      right: 14px;
+      bottom: 170px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fab {
+      width: 52px;
+      height: 52px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .bottom-sheet {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 1000;
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .sheet-handle {
+      width: 40px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(60, 60, 67, 0.25);
+      margin: 0 auto 12px;
+    }
+
+    .title {
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      margin: 0 0 14px;
+    }
+
+    .coords-box {
+      background: rgba(118, 118, 128, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .coords-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .coords-value {
+      font-size: 14px;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .confirm-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      background: var(--accent);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 16px;
+      cursor: pointer;
+    }
+
+    .confirm-btn:active {
+      background: var(--accent-pressed);
+    }
+
+    .confirm-btn:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+
+    .hint {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .leaflet-control-attribution {
+      font-size: 10px !important;
+      background: rgba(255,255,255,0.75) !important;
+      border-radius: 8px 0 0 0;
+    }
+
+    .custom-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #0a84ff;
+      border: 3px solid white;
+      box-shadow: 0 4px 12px rgba(10, 132, 255, 0.4);
     }
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="bar">
-    <button id="sendBtn">Подтвердить точку</button>
+  <div id="app">
+    <div id="map"></div>
+
+    <div class="topbar">
+      <div class="segment">
+        <button id="mapModeBtn" class="active">Карта</button>
+        <button id="satModeBtn">Спутник</button>
+      </div>
+    </div>
+
+    <div class="floating-actions">
+      <button id="locateBtn" class="fab" title="Моё местоположение">◎</button>
+    </div>
+
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="title">Выберите точку доставки</div>
+      <div class="subtitle">Нажмите на карту, чтобы поставить точку</div>
+
+      <div class="coords-box">
+        <div class="coords-label">Выбранная точка</div>
+        <div id="coordsValue" class="coords-value">Точка пока не выбрана</div>
+      </div>
+
+      <button id="confirmBtn" class="confirm-btn" disabled>Подтвердить точку</button>
+      <div class="hint">Можно переключать режим карты и двигать точку повторным нажатием</div>
+    </div>
   </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const map = L.map("map").setView([51.831711, 9.447659], 11);
+    const map = L.map("map", {
+      zoomControl: false,
+      preferCanvas: true
+    }).setView([51.831711, 9.447659], 11);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors"
-    }).addTo(map);
+    const streetLayer = L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      { attribution: "&copy; OpenStreetMap contributors" }
+    );
 
+    const satelliteLayer = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      { attribution: "Tiles &copy; Esri" }
+    );
+
+    streetLayer.addTo(map);
+
+    let currentLayer = "map";
     let marker = null;
     let selected = null;
 
-    map.on("click", function (e) {
-      const { lat, lng } = e.latlng;
-      selected = { lat: lat, lon: lng };
+    const coordsValue = document.getElementById("coordsValue");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const mapModeBtn = document.getElementById("mapModeBtn");
+    const satModeBtn = document.getElementById("satModeBtn");
+    const locateBtn = document.getElementById("locateBtn");
+
+    function updateModeButtons() {
+      mapModeBtn.classList.toggle("active", currentLayer === "map");
+      satModeBtn.classList.toggle("active", currentLayer === "sat");
+    }
+
+    function switchToMap() {
+      if (currentLayer === "map") return;
+      map.removeLayer(satelliteLayer);
+      streetLayer.addTo(map);
+      currentLayer = "map";
+      updateModeButtons();
+    }
+
+    function switchToSatellite() {
+      if (currentLayer === "sat") return;
+      map.removeLayer(streetLayer);
+      satelliteLayer.addTo(map);
+      currentLayer = "sat";
+      updateModeButtons();
+    }
+
+    function formatCoords(lat, lon) {
+      return `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    }
+
+    function setMarker(lat, lon) {
+      selected = { lat, lon };
+      coordsValue.textContent = formatCoords(lat, lon);
+      confirmBtn.disabled = false;
 
       if (marker) {
-        marker.setLatLng([lat, lng]);
+        marker.setLatLng([lat, lon]);
       } else {
-        marker = L.marker([lat, lng]).addTo(map);
+        const icon = L.divIcon({
+          className: "",
+          html: '<div class="custom-marker"></div>',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        marker = L.marker([lat, lon], { icon }).addTo(map);
       }
+    }
+
+    map.on("click", function (e) {
+      setMarker(e.latlng.lat, e.latlng.lng);
     });
 
-    document.getElementById("sendBtn").addEventListener("click", function () {
-      if (!selected) {
-        alert("Сначала выберите точку на карте");
+    mapModeBtn.addEventListener("click", switchToMap);
+    satModeBtn.addEventListener("click", switchToSatellite);
+
+    locateBtn.addEventListener("click", function () {
+      if (!navigator.geolocation) {
+        alert("Геолокация не поддерживается на этом устройстве");
         return;
       }
 
-      tg.sendData(JSON.stringify(selected));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          map.setView([lat, lon], 16, { animate: true });
+          setMarker(lat, lon);
+        },
+        () => {
+          alert("Не удалось определить местоположение");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    });
+
+    confirmBtn.addEventListener("click", function () {
+      if (!selected) return;
+
+      tg.sendData(JSON.stringify({
+        lat: selected.lat,
+        lon: selected.lon
+      }));
       tg.close();
     });
   </script>
