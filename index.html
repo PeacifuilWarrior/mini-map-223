@@ -2,596 +2,207 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Выбор точки доставки</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  />
+  <title>Delivery Mini App</title>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <style>
-    :root {
-      --bg: #0f1115;
-      --card: rgba(20, 22, 28, 0.82);
-      --text: #ffffff;
-      --muted: #a8adb7;
-      --accent: #4f8cff;
-      --border: rgba(255, 255, 255, 0.08);
-      --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --safe-top: env(safe-area-inset-top, 0px);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    }
-
-    #app {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    #map {
-      width: 100%;
-      height: 100%;
-      filter: saturate(1.08) contrast(1.06) brightness(1.02);
-    }
-
-    .top-wrap {
-      position: absolute;
-      top: calc(12px + var(--safe-top));
-      left: 12px;
-      right: 12px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    .glass {
-      background: var(--card);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      pointer-events: auto;
-    }
-
-    .search-box {
-      border-radius: 18px;
-      padding: 10px 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .search-icon {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .search-input {
-      flex: 1;
-      background: transparent;
-      border: 0;
-      outline: none;
-      color: var(--text);
-      font-size: 15px;
-    }
-
-    .search-input::placeholder {
-      color: var(--muted);
-    }
-
-    .search-btn {
-      border: 0;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      padding: 10px 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .segment-row {
-      display: flex;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    .segment {
-      display: inline-flex;
-      gap: 4px;
-      border-radius: 999px;
-      padding: 4px;
-      pointer-events: auto;
-    }
-
-    .segment button {
-      border: 0;
-      background: transparent;
-      color: var(--text);
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .segment button.active {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .results {
-      border-radius: 18px;
-      overflow: hidden;
-      max-height: 240px;
-      display: none;
-    }
-
-    .results.show {
-      display: block;
-    }
-
-    .result-item {
-      padding: 12px 14px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      cursor: pointer;
-      font-size: 14px;
-      line-height: 1.35;
-    }
-
-    .result-item:first-child {
-      border-top: 0;
-    }
-
-    .result-item:hover {
-      background: rgba(255,255,255,0.05);
-    }
-
-    .result-title {
-      color: var(--text);
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .result-sub {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .floating-actions {
-      position: absolute;
-      right: 14px;
-      bottom: 180px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .fab {
-      width: 52px;
-      height: 52px;
-      border: 0;
-      border-radius: 50%;
-      color: var(--text);
-      font-size: 20px;
-      cursor: pointer;
-    }
-
-    .bottom-sheet {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: calc(12px + var(--safe-bottom));
-      z-index: 1000;
-      border-radius: 28px;
-      padding: 14px;
-    }
-
-    .sheet-handle {
-      width: 40px;
-      height: 5px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
-      margin: 0 auto 12px;
-    }
-
-    .title {
-      font-size: 18px;
-      font-weight: 800;
-      text-align: center;
-      margin: 0 0 4px;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-      margin: 0 0 14px;
-    }
-
-    .info-card {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 18px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    .info-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .info-value {
-      font-size: 14px;
-      font-weight: 600;
-      line-height: 1.4;
-      word-break: break-word;
-      min-height: 40px;
-    }
-
-    .confirm-btn {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #5c97ff 0%, #3a7bff 100%);
-      color: white;
-      font-size: 16px;
-      font-weight: 800;
-      padding: 15px 16px;
-      cursor: pointer;
-    }
-
-    .confirm-btn:disabled {
-      opacity: 0.45;
-      cursor: default;
-    }
-
-    .hint {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .leaflet-control-zoom {
-      display: none;
-    }
-
-    .leaflet-control-attribution {
-      font-size: 10px !important;
-      background: rgba(16,16,18,0.72) !important;
-      color: #ddd !important;
-      border-radius: 10px 0 0 0;
-      backdrop-filter: blur(10px);
-    }
-
-    .custom-marker {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #8db7ff 0%, #3f86ff 55%, #256fff 100%);
-      border: 3px solid rgba(255,255,255,0.95);
-      box-shadow: 0 0 0 8px rgba(79, 140, 255, 0.12), 0 8px 18px rgba(27, 89, 214, 0.45);
-    }
-
-    .loader {
-      display: none;
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 8px;
-    }
-
-    .loader.show {
-      display: block;
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div id="app">
-    <div id="map"></div>
+    <div id="screen-home" class="screen active">
+      <div class="page">
+        <div class="hero-card glass">
+          <div class="hero-icon">🍫</div>
+          <div class="hero-title">Заказ шоколада</div>
+          <div class="hero-subtitle">
+            Оформление в пару шагов: товар, адрес, подтверждение.
+          </div>
+        </div>
 
-    <div class="top-wrap">
-      <div class="search-box glass">
-        <div class="search-icon">⌕</div>
-        <input id="searchInput" class="search-input" type="text" placeholder="Поиск адреса или места" />
-        <button id="searchBtn" class="search-btn">Найти</button>
-      </div>
+        <div class="stack">
+          <button id="goCatalogBtn" class="btn btn-primary btn-xl">
+            Оформить заказ
+          </button>
 
-      <div class="results glass" id="resultsBox"></div>
-
-      <div class="segment-row">
-        <div class="segment glass">
-          <button id="mapModeBtn" class="active">Карта</button>
-          <button id="satModeBtn">Спутник</button>
+          <button id="goHelpBtn" class="btn btn-secondary btn-xl">
+            Тех. помощь
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="floating-actions">
-      <button id="locateBtn" class="fab glass" title="Моё местоположение">◎</button>
-    </div>
+    <div id="screen-catalog" class="screen">
+      <div class="page">
+        <div class="topbar">
+          <button class="icon-btn" data-back="home">‹</button>
+          <div class="topbar-title">Каталог</div>
+          <div class="topbar-placeholder"></div>
+        </div>
 
-    <div class="bottom-sheet glass">
-      <div class="sheet-handle"></div>
-      <div class="title">Выберите точку доставки</div>
-      <div class="subtitle">Нажмите на карту или найдите адрес сверху</div>
+        <div id="productGrid" class="product-grid"></div>
 
-      <div class="info-card">
-        <div class="info-label">Адрес / точка</div>
-        <div id="addressValue" class="info-value">Точка пока не выбрана</div>
+        <div class="bottom-action glass">
+          <div class="summary-row">
+            <div>
+              <div class="summary-label">Выбрано</div>
+              <div id="selectedProductText" class="summary-value">Ничего не выбрано</div>
+            </div>
+            <div class="qty-control">
+              <button id="minusQtyBtn" class="qty-btn">−</button>
+              <div id="qtyValue" class="qty-value">1</div>
+              <button id="plusQtyBtn" class="qty-btn">+</button>
+            </div>
+          </div>
+
+          <button id="toMapBtn" class="btn btn-primary btn-xl" disabled>
+            Далее к адресу
+          </button>
+        </div>
       </div>
-
-      <button id="confirmBtn" class="confirm-btn" disabled>Подтвердить точку</button>
-      <div id="loader" class="loader">Определяю адрес...</div>
-      <div class="hint">Подсказки появляются прямо во время ввода</div>
     </div>
+
+    <div id="screen-map" class="screen">
+      <div class="map-layout">
+        <div id="map"></div>
+
+        <div class="map-top-wrap">
+          <div class="search-box glass">
+            <div class="search-icon">⌕</div>
+            <input
+              id="searchInput"
+              class="search-input"
+              type="text"
+              placeholder="Поиск адреса или места"
+              autocomplete="off"
+              inputmode="search"
+            />
+            <button id="clearSearchBtn" class="mini-action-btn" aria-label="Очистить">
+              ×
+            </button>
+          </div>
+
+          <div id="resultsBox" class="results glass"></div>
+
+          <div class="segment-row">
+            <div class="segment glass">
+              <button id="mapModeBtn" class="active">Карта</button>
+              <button id="satModeBtn">Спутник</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="floatingActions" class="floating-actions">
+          <button id="locateBtn" class="fab glass" title="Моё местоположение">◎</button>
+        </div>
+
+        <div id="mapSheet" class="bottom-sheet glass">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title">Адрес доставки</div>
+          <div class="sheet-subtitle">Нажмите на карту или найдите адрес сверху</div>
+
+          <div class="info-card">
+            <div class="info-label">Выбранный адрес</div>
+            <div id="addressValue" class="info-value">Точка пока не выбрана</div>
+          </div>
+
+          <div id="mapLoader" class="loader">Определяю адрес...</div>
+
+          <div class="sheet-actions two-buttons">
+            <button class="btn btn-secondary" data-back="catalog">Назад</button>
+            <button id="toConfirmBtn" class="btn btn-primary" disabled>
+              Подтвердить точку
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-confirm" class="screen">
+      <div class="page">
+        <div class="topbar">
+          <button class="icon-btn" data-back="map">‹</button>
+          <div class="topbar-title">Подтверждение</div>
+          <div class="topbar-placeholder"></div>
+        </div>
+
+        <div class="confirm-card glass">
+          <div class="confirm-row">
+            <div class="confirm-label">Товар</div>
+            <div id="confirmProduct" class="confirm-value">—</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="confirm-label">Количество</div>
+            <div id="confirmQty" class="confirm-value">—</div>
+          </div>
+
+          <div class="confirm-row">
+            <div class="confirm-label">Адрес</div>
+            <div id="confirmAddress" class="confirm-value multiline">—</div>
+          </div>
+
+          <div class="confirm-row column">
+            <div class="confirm-label">Комментарий</div>
+            <textarea
+              id="commentInput"
+              class="comment-input"
+              placeholder="Например: без звонка"
+              rows="4"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="bottom-action glass">
+          <button id="submitOrderBtn" class="btn btn-primary btn-xl">
+            Оформить заказ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="screen-help" class="screen">
+      <div class="page">
+        <div class="topbar">
+          <button class="icon-btn" data-back="home">‹</button>
+          <div class="topbar-title">Тех. помощь</div>
+          <div class="topbar-placeholder"></div>
+        </div>
+
+        <div class="help-card glass">
+          <div class="help-title">Если что-то не работает</div>
+          <div class="help-text">
+            Если приложение не открывается, не ищет адрес или не получается выбрать точку,
+            напишите в техподдержку.
+          </div>
+
+          <div class="help-contact">@PeacefulWarri0rrr</div>
+
+          <a
+            class="btn btn-primary btn-xl help-link"
+            href="https://t.me/PeacefulWarri0rrr"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Написать в Telegram
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-
-    const map = L.map("map", {
-      zoomControl: false,
-      preferCanvas: true
-    }).setView([51.831711, 9.447659], 11);
-
-    // Светлая и контрастная карта
-    const streetLayer = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-      { attribution: "&copy; OpenStreetMap &copy; CARTO" }
-    );
-
-    const satelliteLayer = L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      { attribution: "Tiles &copy; Esri" }
-    );
-
-    streetLayer.addTo(map);
-
-    let currentLayer = "map";
-    let marker = null;
-    let selected = null;
-    let searchAbortController = null;
-    let inputDebounce = null;
-
-    const addressValue = document.getElementById("addressValue");
-    const confirmBtn = document.getElementById("confirmBtn");
-    const mapModeBtn = document.getElementById("mapModeBtn");
-    const satModeBtn = document.getElementById("satModeBtn");
-    const locateBtn = document.getElementById("locateBtn");
-    const searchInput = document.getElementById("searchInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const resultsBox = document.getElementById("resultsBox");
-    const loader = document.getElementById("loader");
-
-    function setLoading(state) {
-      loader.classList.toggle("show", !!state);
-    }
-
-    function updateModeButtons() {
-      mapModeBtn.classList.toggle("active", currentLayer === "map");
-      satModeBtn.classList.toggle("active", currentLayer === "sat");
-    }
-
-    function switchToMap() {
-      if (currentLayer === "map") return;
-      map.removeLayer(satelliteLayer);
-      streetLayer.addTo(map);
-      currentLayer = "map";
-      updateModeButtons();
-    }
-
-    function switchToSatellite() {
-      if (currentLayer === "sat") return;
-      map.removeLayer(streetLayer);
-      satelliteLayer.addTo(map);
-      currentLayer = "sat";
-      updateModeButtons();
-    }
-
-    function createMarker(lat, lon) {
-      const icon = L.divIcon({
-        className: "",
-        html: '<div class="custom-marker"></div>',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11]
-      });
-
-      marker = L.marker([lat, lon], { icon }).addTo(map);
-    }
-
-    function setMarker(lat, lon) {
-      selected = { lat, lon };
-      confirmBtn.disabled = false;
-
-      if (marker) {
-        marker.setLatLng([lat, lon]);
-      } else {
-        createMarker(lat, lon);
-      }
-    }
-
-    async function reverseGeocode(lat, lon) {
-      try {
-        setLoading(true);
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`;
-        const res = await fetch(url, {
-          headers: { "Accept-Language": "ru,en" }
-        });
-        const data = await res.json();
-        addressValue.textContent = data.display_name || "Точка выбрана";
-      } catch {
-        addressValue.textContent = "Точка выбрана";
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    async function applyPoint(lat, lon, zoom = true) {
-      setMarker(lat, lon);
-      if (zoom) {
-        map.setView([lat, lon], 16, { animate: true });
-      }
-      await reverseGeocode(lat, lon);
-    }
-
-    function clearResults() {
-      resultsBox.innerHTML = "";
-      resultsBox.classList.remove("show");
-    }
-
-    function renderResults(items) {
-      resultsBox.innerHTML = "";
-
-      if (!items.length) {
-        clearResults();
-        return;
-      }
-
-      items.forEach((item) => {
-        const div = document.createElement("div");
-        div.className = "result-item";
-        div.innerHTML = `
-          <div class="result-title">${item.display_name}</div>
-          <div class="result-sub">Нажмите, чтобы выбрать</div>
-        `;
-        div.addEventListener("click", async () => {
-          clearResults();
-          searchInput.value = item.display_name;
-          await applyPoint(Number(item.lat), Number(item.lon), true);
-        });
-        resultsBox.appendChild(div);
-      });
-
-      resultsBox.classList.add("show");
-    }
-
-    async function searchAddress(live = false) {
-      const q = searchInput.value.trim();
-      if (!q || q.length < 3) {
-        clearResults();
-        return;
-      }
-
-      try {
-        if (searchAbortController) {
-          searchAbortController.abort();
-        }
-        searchAbortController = new AbortController();
-
-        if (!live) {
-          searchBtn.disabled = true;
-          searchBtn.textContent = "…";
-        }
-
-        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=6`;
-        const res = await fetch(url, {
-          signal: searchAbortController.signal,
-          headers: { "Accept-Language": "ru,en" }
-        });
-
-        const data = await res.json();
-        renderResults(data);
-      } catch (e) {
-        if (e.name !== "AbortError") {
-          clearResults();
-        }
-      } finally {
-        searchBtn.disabled = false;
-        searchBtn.textContent = "Найти";
-      }
-    }
-
-    map.on("click", async function (e) {
-      clearResults();
-      await applyPoint(e.latlng.lat, e.latlng.lng, false);
-    });
-
-    mapModeBtn.addEventListener("click", switchToMap);
-    satModeBtn.addEventListener("click", switchToSatellite);
-
-    locateBtn.addEventListener("click", function () {
-      if (!navigator.geolocation) {
-        alert("Геолокация не поддерживается");
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          clearResults();
-          const lat = pos.coords.latitude;
-          const lon = pos.coords.longitude;
-          await applyPoint(lat, lon, true);
-        },
-        () => {
-          alert("Не удалось определить местоположение");
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
-    });
-
-    searchBtn.addEventListener("click", () => searchAddress(false));
-
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        searchAddress(false);
-      }
-    });
-
-    searchInput.addEventListener("input", () => {
-      clearTimeout(inputDebounce);
-
-      if (!searchInput.value.trim()) {
-        clearResults();
-        return;
-      }
-
-      inputDebounce = setTimeout(() => {
-        searchAddress(true);
-      }, 280);
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!resultsBox.contains(e.target) && e.target !== searchInput) {
-        clearResults();
-      }
-    });
-
-    confirmBtn.addEventListener("click", function () {
-      if (!selected) return;
-
-      tg.sendData(JSON.stringify({
-        lat: selected.lat,
-        lon: selected.lon
-      }));
-      tg.close();
-    });
-  </script>
+  <script src="./app.js"></script>
 </body>
 </html>
