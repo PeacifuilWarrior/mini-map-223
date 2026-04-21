@@ -1,208 +1,109 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-  />
-  <title>Delivery Mini App</title>
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SweetFlow Mini App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div id="app">
-    <div id="screen-home" class="screen active">
-      <div class="page">
-        <div class="hero-card glass">
-          <div class="hero-icon">🍫</div>
-          <div class="hero-title">Заказ шоколада</div>
-          <div class="hero-subtitle">
-            Оформление в пару шагов: товар, адрес, подтверждение.
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero__badge">Telegram Mini App</div>
+      <div class="hero__content">
+        <p class="hero__eyebrow">SweetFlow</p>
+        <h1>Витрина заказов, которая выглядит как сервис, а не как черновик.</h1>
+        <p class="hero__text">
+          Здесь можно оформить заказ, быстро посмотреть популярные позиции и видеть аккуратный статус вместо длинной переписки.
+        </p>
+      </div>
+      <div class="hero__glow hero__glow--one"></div>
+      <div class="hero__glow hero__glow--two"></div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--catalog">
+        <div class="panel__head">
+          <div>
+            <p class="panel__kicker">Каталог</p>
+            <h2>Популярные позиции</h2>
+          </div>
+          <button class="ghost-button" id="refreshButton" type="button">Обновить</button>
+        </div>
+        <div class="catalog-grid" id="catalogGrid"></div>
+      </section>
+
+      <section class="panel panel--status">
+        <div class="panel__head">
+          <div>
+            <p class="panel__kicker">Статус</p>
+            <h2>Что видит пользователь</h2>
           </div>
         </div>
 
-        <div class="stack">
-          <button id="goCatalogBtn" class="btn btn-primary btn-xl">
-            Оформить заказ
-          </button>
-
-          <button id="goHelpBtn" class="btn btn-secondary btn-xl">
-            Тех. помощь
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="screen-catalog" class="screen">
-      <div class="page">
-        <div class="topbar">
-          <button class="icon-btn" data-back="home">‹</button>
-          <div class="topbar-title">Каталог</div>
-          <div class="topbar-placeholder"></div>
-        </div>
-
-        <div id="productGrid" class="product-grid"></div>
-
-        <div class="bottom-action glass">
-          <div class="summary-row">
+        <article class="status-card">
+          <div class="status-card__top">
+            <span class="status-pill">Заказ №184</span>
+            <span class="status-chip">В маршруте</span>
+          </div>
+          <div class="status-card__body">
             <div>
-              <div class="summary-label">Выбрано</div>
-              <div id="selectedProductText" class="summary-value">Ничего не выбрано</div>
+              <span class="status-card__label">Товар</span>
+              <strong>Milka × 2</strong>
             </div>
-            <div class="qty-control">
-              <button id="minusQtyBtn" class="qty-btn">−</button>
-              <div id="qtyValue" class="qty-value">1</div>
-              <button id="plusQtyBtn" class="qty-btn">+</button>
+            <div>
+              <span class="status-card__label">Город</span>
+              <strong>Hannover</strong>
             </div>
-          </div>
-
-          <button id="toMapBtn" class="btn btn-primary btn-xl" disabled>
-            Далее к адресу
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="screen-map" class="screen">
-      <div class="map-layout">
-        <div id="map"></div>
-
-        <div class="map-top-wrap">
-          <div class="search-box glass">
-            <div class="search-icon">⌕</div>
-            <input
-              id="searchInput"
-              class="search-input"
-              type="text"
-              placeholder="Поиск адреса или места"
-              autocomplete="off"
-              inputmode="search"
-            />
-            <button id="clearSearchBtn" class="mini-action-btn" aria-label="Очистить">
-              ×
-            </button>
-          </div>
-
-          <div id="resultsBox" class="results glass"></div>
-
-          <div class="segment-row">
-            <div class="segment glass">
-              <button id="mapModeBtn" class="active">Карта</button>
-              <button id="satModeBtn">Спутник</button>
+            <div>
+              <span class="status-card__label">Комментарий</span>
+              <strong>Связаться за 10 минут до доставки</strong>
             </div>
           </div>
-        </div>
+        </article>
 
-        <div id="floatingActions" class="floating-actions">
-          <button id="locateBtn" class="fab glass" title="Моё местоположение">◎</button>
-        </div>
-
-        <div id="mapSheet" class="bottom-sheet glass">
-          <div class="sheet-handle"></div>
-          <div class="sheet-title">Адрес доставки</div>
-          <div class="sheet-subtitle">Нажмите на карту или найдите адрес сверху</div>
-
-          <div class="info-card">
-            <div class="info-label">Выбранный адрес</div>
-            <div id="addressValue" class="info-value">Точка пока не выбрана</div>
+        <form class="order-form" id="orderForm">
+          <label class="field">
+            <span>Товар</span>
+            <select id="productInput" name="product"></select>
+          </label>
+          <label class="field">
+            <span>Количество</span>
+            <input id="quantityInput" name="quantity" type="number" min="1" value="2">
+          </label>
+          <label class="field">
+            <span>Город</span>
+            <input id="cityInput" name="city" type="text" value="Berlin" placeholder="Например, Berlin">
+          </label>
+          <label class="field">
+            <span>Комментарий</span>
+            <textarea id="commentInput" name="comment" rows="3" placeholder="Пожелания к заказу"></textarea>
+          </label>
+          <div class="actions">
+            <button class="primary-button" type="submit">Собрать предпросмотр</button>
+            <button class="secondary-button" type="button" id="statusButton">Показать статус</button>
           </div>
+        </form>
+      </section>
+    </main>
 
-          <div id="mapLoader" class="loader">Определяю адрес...</div>
-
-          <div class="sheet-actions two-buttons">
-            <button class="btn btn-secondary" data-back="catalog">Назад</button>
-            <button id="toConfirmBtn" class="btn btn-primary" disabled>
-              Подтвердить точку
-            </button>
-          </div>
+    <section class="preview panel">
+      <div class="panel__head">
+        <div>
+          <p class="panel__kicker">Предпросмотр</p>
+          <h2>Как может выглядеть карточка заказа</h2>
         </div>
       </div>
-    </div>
-
-    <div id="screen-confirm" class="screen">
-      <div class="page">
-        <div class="topbar">
-          <button class="icon-btn" data-back="map">‹</button>
-          <div class="topbar-title">Подтверждение</div>
-          <div class="topbar-placeholder"></div>
-        </div>
-
-        <div class="confirm-card glass">
-          <div class="confirm-row">
-            <div class="confirm-label">Товар</div>
-            <div id="confirmProduct" class="confirm-value">—</div>
-          </div>
-
-          <div class="confirm-row">
-            <div class="confirm-label">Количество</div>
-            <div id="confirmQty" class="confirm-value">—</div>
-          </div>
-
-          <div class="confirm-row">
-            <div class="confirm-label">Адрес</div>
-            <div id="confirmAddress" class="confirm-value multiline">—</div>
-          </div>
-
-          <div class="confirm-row column">
-            <div class="confirm-label">Комментарий</div>
-            <textarea
-              id="commentInput"
-              class="comment-input"
-              placeholder="Например: без звонка"
-              rows="4"
-            ></textarea>
-          </div>
-        </div>
-
-        <div class="bottom-action glass">
-          <button id="submitOrderBtn" class="btn btn-primary btn-xl">
-            Оформить заказ
-          </button>
-        </div>
+      <div class="preview-card" id="previewCard">
+        <p class="preview-card__hint">Заполните форму справа, и здесь появится аккуратная карточка заказа.</p>
       </div>
-    </div>
-
-    <div id="screen-help" class="screen">
-      <div class="page">
-        <div class="topbar">
-          <button class="icon-btn" data-back="home">‹</button>
-          <div class="topbar-title">Тех. помощь</div>
-          <div class="topbar-placeholder"></div>
-        </div>
-
-        <div class="help-card glass">
-          <div class="help-title">Если что-то не работает</div>
-          <div class="help-text">
-            Если приложение не открывается, не ищет адрес или не получается выбрать точку,
-            напишите в техподдержку.
-          </div>
-
-          <div class="help-contact">@PeacefulWarri0rrr</div>
-
-          <a
-            class="btn btn-primary btn-xl help-link"
-            href="https://t.me/PeacefulWarri0rrr"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Написать в Telegram
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div id="toast" class="toast"></div>
+    </section>
   </div>
 
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
