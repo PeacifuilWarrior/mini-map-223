@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SweetFlow Mini App</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,97 +10,180 @@
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="hero__badge">Telegram Mini App</div>
-      <div class="hero__content">
-        <p class="hero__eyebrow">SweetFlow</p>
-        <h1>Витрина заказов, которая выглядит как сервис, а не как черновик.</h1>
-        <p class="hero__text">
-          Здесь можно оформить заказ, быстро посмотреть популярные позиции и видеть аккуратный статус вместо длинной переписки.
-        </p>
+  <div class="app" id="app">
+    <div class="ambient ambient--one"></div>
+    <div class="ambient ambient--two"></div>
+
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">SweetFlow</p>
+        <h1>Доставка сладостей без хаоса в переписке</h1>
       </div>
-      <div class="hero__glow hero__glow--one"></div>
-      <div class="hero__glow hero__glow--two"></div>
+      <button class="icon-button" id="themeToggle" type="button" aria-label="Переключить тему">◐</button>
     </header>
 
-    <main class="layout">
-      <section class="panel panel--catalog">
-        <div class="panel__head">
+    <section class="hero-card">
+      <div class="hero-copy">
+        <span class="hero-badge">Mini App</span>
+        <h2>Каталог, заказ и статус в одном спокойном интерфейсе</h2>
+        <p>
+          Пользователь видит только нужное: товары, корзину, подтверждение и свой статус. Внутренние данные остаются внутри бота.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <article>
+          <span>В пути сегодня</span>
+          <strong>12</strong>
+        </article>
+        <article>
+          <span>В наличии</span>
+          <strong>47</strong>
+        </article>
+        <article>
+          <span>Среднее время</span>
+          <strong>35 мин</strong>
+        </article>
+      </div>
+    </section>
+
+    <nav class="quick-strip" id="categoryStrip"></nav>
+
+    <main class="screen-stack">
+      <section class="screen is-active" data-screen="catalog">
+        <div class="section-head">
           <div>
-            <p class="panel__kicker">Каталог</p>
-            <h2>Популярные позиции</h2>
+            <p class="eyebrow">Каталог</p>
+            <h3>Что можно заказать прямо сейчас</h3>
           </div>
-          <button class="ghost-button" id="refreshButton" type="button">Обновить</button>
+          <button class="ghost-button" id="shuffleProducts" type="button">Обновить подборку</button>
         </div>
-        <div class="catalog-grid" id="catalogGrid"></div>
+
+        <div class="collection-rail" id="featureRail"></div>
+        <div class="product-grid" id="productGrid"></div>
       </section>
 
-      <section class="panel panel--status">
-        <div class="panel__head">
+      <section class="screen" data-screen="order">
+        <div class="section-head">
           <div>
-            <p class="panel__kicker">Статус</p>
-            <h2>Что видит пользователь</h2>
+            <p class="eyebrow">Оформление</p>
+            <h3>Соберите заказ за пару шагов</h3>
           </div>
         </div>
 
-        <article class="status-card">
-          <div class="status-card__top">
-            <span class="status-pill">Заказ №184</span>
-            <span class="status-chip">В маршруте</span>
-          </div>
-          <div class="status-card__body">
-            <div>
-              <span class="status-card__label">Товар</span>
-              <strong>Milka × 2</strong>
-            </div>
-            <div>
-              <span class="status-card__label">Город</span>
-              <strong>Hannover</strong>
-            </div>
-            <div>
-              <span class="status-card__label">Комментарий</span>
-              <strong>Связаться за 10 минут до доставки</strong>
-            </div>
-          </div>
-        </article>
+        <section class="order-layout">
+          <article class="panel card-form">
+            <form id="orderForm" class="form-grid">
+              <label class="field">
+                <span>Товар</span>
+                <select id="productInput" name="product"></select>
+              </label>
 
-        <form class="order-form" id="orderForm">
-          <label class="field">
-            <span>Товар</span>
-            <select id="productInput" name="product"></select>
-          </label>
-          <label class="field">
-            <span>Количество</span>
-            <input id="quantityInput" name="quantity" type="number" min="1" value="2">
-          </label>
-          <label class="field">
-            <span>Город</span>
-            <input id="cityInput" name="city" type="text" value="Berlin" placeholder="Например, Berlin">
-          </label>
-          <label class="field">
-            <span>Комментарий</span>
-            <textarea id="commentInput" name="comment" rows="3" placeholder="Пожелания к заказу"></textarea>
-          </label>
-          <div class="actions">
-            <button class="primary-button" type="submit">Собрать предпросмотр</button>
-            <button class="secondary-button" type="button" id="statusButton">Показать статус</button>
+              <label class="field field--split">
+                <span>Количество</span>
+                <div class="counter">
+                  <button type="button" class="counter__button" id="minusQty">−</button>
+                  <input id="quantityInput" name="quantity" type="number" min="1" value="2">
+                  <button type="button" class="counter__button" id="plusQty">+</button>
+                </div>
+              </label>
+
+              <label class="field">
+                <span>Город</span>
+                <input id="cityInput" name="city" type="text" value="Berlin" placeholder="Например, Berlin">
+              </label>
+
+              <label class="field">
+                <span>Контакт</span>
+                <input id="contactInput" name="contact" type="text" placeholder="@username или номер">
+              </label>
+
+              <label class="field field--full">
+                <span>Комментарий</span>
+                <textarea id="commentInput" name="comment" rows="4" placeholder="Пожелания к заказу, подъезд, созвон, удобное время"></textarea>
+              </label>
+
+              <div class="pill-group" id="presetComments"></div>
+
+              <div class="actions field--full">
+                <button class="primary-button" type="submit">Собрать карточку</button>
+                <button class="secondary-button" type="button" id="fillDemoOrder">Демо-заказ</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="panel cart-card" id="cartCard">
+            <div class="cart-card__head">
+              <div>
+                <p class="eyebrow">Карточка заказа</p>
+                <h4>Готово к подтверждению</h4>
+              </div>
+              <span class="status-tag">Черновик</span>
+            </div>
+            <div class="preview-order" id="previewOrder"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="screen" data-screen="status">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Статус</p>
+            <h3>Как выглядит понятный прогресс заказа</h3>
           </div>
-        </form>
+          <button class="ghost-button" id="rotateStatus" type="button">Следующий статус</button>
+        </div>
+
+        <section class="status-layout">
+          <article class="panel status-summary">
+            <div class="status-summary__top">
+              <div>
+                <span class="status-badge" id="statusBadge">Новый</span>
+                <h4 id="statusTitle">Заказ №184 принят</h4>
+              </div>
+              <p id="statusEta">ETA: 35 мин</p>
+            </div>
+            <div class="status-summary__grid">
+              <div>
+                <span>Город</span>
+                <strong id="statusCity">Hannover</strong>
+              </div>
+              <div>
+                <span>Состав</span>
+                <strong id="statusItems">Milka × 2</strong>
+              </div>
+              <div>
+                <span>Комментарий</span>
+                <strong id="statusComment">Связаться за 10 минут до доставки</strong>
+              </div>
+              <div>
+                <span>Последнее обновление</span>
+                <strong id="statusUpdated">только что</strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel timeline-card">
+            <p class="eyebrow">Этапы</p>
+            <div class="timeline" id="timeline"></div>
+          </article>
+        </section>
       </section>
     </main>
 
-    <section class="preview panel">
-      <div class="panel__head">
-        <div>
-          <p class="panel__kicker">Предпросмотр</p>
-          <h2>Как может выглядеть карточка заказа</h2>
-        </div>
-      </div>
-      <div class="preview-card" id="previewCard">
-        <p class="preview-card__hint">Заполните форму справа, и здесь появится аккуратная карточка заказа.</p>
-      </div>
-    </section>
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="bottom-nav__item is-active" data-target="catalog" type="button">
+        <span>▦</span>
+        <strong>Каталог</strong>
+      </button>
+      <button class="bottom-nav__item" data-target="order" type="button">
+        <span>✎</span>
+        <strong>Заказ</strong>
+      </button>
+      <button class="bottom-nav__item" data-target="status" type="button">
+        <span>◔</span>
+        <strong>Статус</strong>
+      </button>
+    </nav>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
